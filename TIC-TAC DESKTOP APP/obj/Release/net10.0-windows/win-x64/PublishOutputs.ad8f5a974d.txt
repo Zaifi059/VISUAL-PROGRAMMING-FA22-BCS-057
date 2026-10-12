@@ -1,0 +1,7 @@
+C:\Users\hp\OneDrive\Desktop\LocalP2PGaming..pdb
+C:\Users\hp\OneDrive\Desktop\D3DCompiler_47_cor3.dll
+C:\Users\hp\OneDrive\Desktop\PenImc_cor3.dll
+C:\Users\hp\OneDrive\Desktop\PresentationNative_cor3.dll
+C:\Users\hp\OneDrive\Desktop\vcruntime140_cor3.dll
+C:\Users\hp\OneDrive\Desktop\wpfgfx_cor3.dll
+C:\Users\hp\OneDrive\Desktop\LocalP2PGaming..exe

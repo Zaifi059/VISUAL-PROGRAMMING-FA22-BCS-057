@@ -1,0 +1,78 @@
+﻿using LocalP2PGaming.ViewModels;
+
+namespace LocalP2PGaming
+{
+    public partial class MainWindow : Window
+    {
+        public MainWindow()
+        {
+            InitializeComponent();
+
+            var vm = new MainViewModel();
+            DataContext = vm;
+
+            // Listen for any moves to update the visual buttons
+            vm.OnUIBoardUpdate += (row, col, piece) =>
+            {
+                var button = (Button)this.FindName($"Btn{row}{col}");
+                if (button != null)
+                {
+                    button.Content = piece;
+                }
+            };
+
+            // Listen for the reset command to clear the board
+            vm.OnUIResetBoard += () =>
+            {
+                for (int r = 0; r < 3; r++)
+                {
+                    for (int c = 0; c < 3; c++)
+                    {
+                        var button = (Button)this.FindName($"Btn{r}{c}");
+                        if (button != null)
+                        {
+                            button.Content = null;
+                        }
+                    }
+                }
+            };
+        }
+
+        private async void Cell_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = (Button)sender;
+            if (btn.Content != null) return; // Prevent clicking already played cells
+
+            // Read the "Row,Col" from the button's Tag property
+            var coords = btn.Tag.ToString()!.Split(',');
+            int r = int.Parse(coords[0]);
+            int c = int.Parse(coords[1]);
+
+            var vm = (MainViewModel)this.DataContext;
+
+            // For testing, automatically play as whichever turn it currently is
+            await vm.SendMove(r, c, vm.GetCurrentTurn());
+        }
+
+        private async void Invite_Click(object sender, RoutedEventArgs e)
+        {
+            // Get the specific player card that was clicked
+            var button = sender as Button;
+            var peer = button?.DataContext as PeerViewModel;
+
+            if (peer != null)
+            {
+                var vm = (MainViewModel)this.DataContext;
+                await vm.InvitePlayer(peer.Ip);
+                button!.Content = "Invited...";
+                button.IsEnabled = false;
+            }
+        }
+
+        private async void Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            var vm = (MainViewModel)this.DataContext;
+            await vm.RefreshDiscoveredPeers();
+        }
+    }
+}

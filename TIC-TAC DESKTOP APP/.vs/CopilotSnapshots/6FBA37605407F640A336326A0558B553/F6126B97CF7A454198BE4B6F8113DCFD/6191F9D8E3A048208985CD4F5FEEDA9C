@@ -1,0 +1,266 @@
+﻿using LocalP2PGaming.Models;
+using System;
+using System.Collections.ObjectModel;
+using System.Text.Json;
+using System.Windows;
+using System.Windows.Input;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace LocalP2PGaming.ViewModels;
+
+public class MainViewModel
+{
+    // Game state
+    private bool _inGame = false;
+    private int _localPlayerId = 0; // 1 = X, 2 = O
+    private System.Threading.CancellationTokenSource? _stallCts;
+    private DateTime _lastMoveTime = DateTime.MinValue;
+    private readonly System.TimeSpan _stallTimeout = System.TimeSpan.FromSeconds(45);
+
+    public async Task InvitePlayer(string ipAddress)
+    {
+        // For local testing on the same PC, we must use localhost
+        // Find the discovered peer to obtain its advertised port (if any)
+        var peer = DiscoveredPeers.FirstOrDefault(p => p.Ip == ipAddress);
+        string connectTarget = ipAddress;
+        if (peer != null && peer.Port > 0)
+        {
+            // If peer is on same machine and advertised localhost, allow connecting via 127.0.0.1
+            if (peer.Ip == NetworkDiscovery.GetLocalIpAddress())
+                connectTarget = $"127.0.0.1:{peer.Port}";
+            else
+                connectTarget = $"{peer.Ip}:{peer.Port}";
+        }
+
+        bool connected = await _network.ConnectToPeerAsync(connectTarget);
+        if (connected)
+        {
+            var inviteMsg = new NetworkMessage
+            {
+                Type = MessageType.GameInvite,
+                SenderName = _discovery.LocalMachineName,
+                Payload = JsonSerializer.Serialize(new GameInvitePayload { GameType = "TicTacToe" })
+            };
+            await _network.SendMessageAsync(inviteMsg);
+        }
+        else
+        {
+            MessageBox.Show("Failed to connect to player.", "Connection Error");
+        }
+    }
+
+    public async Task RefreshDiscoveredPeers()
+    {
+        // Clear existing peers and rescan the network
+        Application.Current.Dispatcher.Invoke(() => DiscoveredPeers.Clear());
+
+        // Re-broadcast ping to discover peers (clear discovered set)
+        await Task.Run(() => _discovery.BroadcastPing(true));
+    }
+
+    public ObservableCollection<PeerViewModel> DiscoveredPeers { get; set; } = new();
+    public event Action<int, int, string>? OnUIBoardUpdate;
+    public event Action? OnUIResetBoard;
+    public int GetCurrentTurn() => _tictactoe.CurrentTurn;
+
+    private NetworkDiscovery _discovery;
+    private NetworkManager _network;
+    private TicTacToeEngine _tictactoe;
+
+    public MainViewModel()
+    {
+        _discovery = new NetworkDiscovery();
+        _network = new NetworkManager();
+        _tictactoe = new TicTacToeEngine();
+
+        Console.WriteLine("=== Application Starting ===");
+        Console.WriteLine($"Local IP: {NetworkDiscovery.GetLocalIpAddress()}");
+        Console.WriteLine($"Machine Name: {Environment.MachineName}");
+
+        // --- ADD THESE LINES TO SHOW GAME OVER MESSAGES ---
+        _tictactoe.OnGameWon += (winnerId) =>
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                MessageBox.Show($"Player {(winnerId == 1 ? "X" : "O")} wins the game!", "Game Over");
+                _tictactoe.Reset();
+                OnUIResetBoard?.Invoke(); // Tell UI to clear
+                _inGame = false;
+                _localPlayerId = 0;
+                CancelStallWatcher();
+            });
+        };
+
+        _tictactoe.OnDraw += () =>
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                MessageBox.Show("The game is a draw!", "Game Over");
+                _tictactoe.Reset();
+                OnUIResetBoard?.Invoke(); // Tell UI to clear
+                _inGame = false;
+                _localPlayerId = 0;
+                CancelStallWatcher();
+            });
+        };
+        // --------------------------------------------------
+
+        // 1. Subscribe to UDP Discovery
+        _discovery.OnPeerDiscovered += (s, e) =>
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Console.WriteLine($"Peer Discovered: {e.MachineName} at {e.IpAddress} (Id:{e.SenderId} Port:{e.SenderPort})");
+                // Prevent duplicates: prefer matching by SenderId if available
+                bool exists = false;
+                if (!string.IsNullOrEmpty(e.SenderId)) exists = DiscoveredPeers.Any(p => p.Id == e.SenderId);
+                if (!exists) exists = DiscoveredPeers.Any(p => p.Ip == e.IpAddress);
+
+                if (!exists)
+                {
+                    DiscoveredPeers.Add(new PeerViewModel { Ip = e.IpAddress, Name = e.MachineName, Id = e.SenderId ?? string.Empty, Port = e.SenderPort });
+                    Console.WriteLine($"Added peer to list. Total peers: {DiscoveredPeers.Count}");
+                }
+            });
+        };
+
+        // 2. Subscribe to TCP Messages
+        _network.OnMessageReceived += HandleIncomingMessage;
+        _network.OnDisconnected += () =>
+        {
+            // Reset game state on disconnect
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _tictactoe.Reset();
+                OnUIResetBoard?.Invoke();
+                _inGame = false;
+                _localPlayerId = 0;
+                CancelStallWatcher();
+            });
+        };
+
+        // Start TCP host first so we know the port to advertise
+        _network.StartHost(); // Start listening for incoming TCP invites
+        // Advertise our TCP port in discovery messages
+        _discovery.AdvertisedPort = _network.Port;
+        _discovery.StartListening();
+        _discovery.BroadcastPing();
+
+        Console.WriteLine("=== Network Services Started ===");
+    }
+
+    private void HandleIncomingMessage(NetworkMessage msg)
+    {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            switch (msg.Type)
+            {
+                case MessageType.GameInvite:
+                    var payload = JsonSerializer.Deserialize<GameInvitePayload>(msg.Payload);
+                    if (payload != null)
+                    {
+                        var result = MessageBox.Show($"{msg.SenderName} invited you to play {payload.GameType}! Do you accept?",
+                                                     "Game Invite",
+                                                     MessageBoxButton.YesNo,
+                                                     MessageBoxImage.Question);
+
+                        if (result == MessageBoxResult.Yes)
+                        {
+                            // Join as Player 2 (O)
+                            _localPlayerId = 2;
+                            _inGame = true;
+                            _lastMoveTime = DateTime.UtcNow;
+                            StartStallWatcher();
+
+                            var acceptMsg = new NetworkMessage { Type = MessageType.GameAccept, SenderName = _discovery.LocalMachineName };
+                            _ = _network.SendMessageAsync(acceptMsg);
+                        }
+                        else
+                        {
+                            // Reject and disconnect
+                            Application.Current.Dispatcher.Invoke(async () =>
+                            {
+                                var rejectMsg = new NetworkMessage { Type = MessageType.GameReject, SenderName = _discovery.LocalMachineName };
+                                await _network.SendMessageAsync(rejectMsg);
+                                _network.Disconnect();
+                                _inGame = false;
+                                _localPlayerId = 0;
+                                CancelStallWatcher();
+                            });
+                        }
+                    }
+                    break;
+
+                case MessageType.GameAccept:
+                    MessageBox.Show($"{msg.SenderName} accepted your invite! The game has started.", "Game On");
+                    // We are the inviter: Player 1 (X)
+                    _localPlayerId = 1;
+                    _inGame = true;
+                    _lastMoveTime = DateTime.UtcNow;
+                    StartStallWatcher();
+                    break;
+
+                case MessageType.GameReject:
+                    MessageBox.Show($"{msg.SenderName} declined your invite.", "Invite Declined");
+                    _network.Disconnect();
+                    // Reset game state
+                    _tictactoe.Reset();
+                    OnUIResetBoard?.Invoke();
+                    _inGame = false;
+                    _localPlayerId = 0;
+                    CancelStallWatcher();
+                    break;
+
+                case MessageType.GameMove:
+                    var move = JsonSerializer.Deserialize<GameMovePayload>(msg.Payload);
+                    if (move != null)
+                    {
+                        _tictactoe.MakeMove(move.StartRow, move.StartCol, move.PlayerId);
+                        // Fire event to draw the opponent's move
+                        OnUIBoardUpdate?.Invoke(move.StartRow, move.StartCol, move.PlayerId == 1 ? "X" : "O");
+                    }
+                    break;
+            }
+        });
+    }
+
+    // Fired from UI Button Command
+    public async Task SendMove(int r, int c, int localPlayerId)
+    {
+        // Enforce that we're in a game and it's the local player's turn.
+        if (!_inGame)
+        {
+            Console.WriteLine("Not in a game - move ignored");
+            return;
+        }
+
+        if (_localPlayerId == 0)
+        {
+            Console.WriteLine("Local player id not set - move ignored");
+            return;
+        }
+
+        if (_localPlayerId != _tictactoe.CurrentTurn)
+        {
+            Console.WriteLine("Not your turn - move ignored");
+            return;
+        }
+
+        if (_tictactoe.MakeMove(r, c, _localPlayerId))
+        {
+            // Fire event to draw our own move
+            OnUIBoardUpdate?.Invoke(r, c, _localPlayerId == 1 ? "X" : "O");
+
+            // Update last move time
+            _lastMoveTime = DateTime.UtcNow;
+
+            var moveMsg = new NetworkMessage
+            {
+                Type = MessageType.GameMove,
+                Payload = JsonSerializer.Serialize(new GameMovePayload { StartRow = r, StartCol = c, PlayerId = _localPlayerId })
+            };
+            await _network.SendMessageAsync(moveMsg);
+        }
+    }
+}

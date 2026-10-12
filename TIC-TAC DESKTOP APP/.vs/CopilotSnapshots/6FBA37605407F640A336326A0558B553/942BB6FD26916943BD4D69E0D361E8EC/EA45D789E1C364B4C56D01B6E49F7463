@@ -1,0 +1,165 @@
+﻿using LocalP2PGaming.Models;
+using System;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+
+
+public class NetworkManager
+{
+    private const int TcpPort = 8889;
+    private TcpListener? _tcpListener;
+    private TcpClient? _tcpClient;
+    private StreamWriter? _writer;
+    private StreamReader? _reader;
+    private CancellationTokenSource _cts = new();
+
+    public event Action<NetworkMessage>? OnMessageReceived;
+    public event Action? OnDisconnected;
+
+    public void StartHost()
+    {
+        Task.Run(() =>
+        {
+            try
+            {
+                _tcpListener = new TcpListener(IPAddress.Any, TcpPort);
+                _tcpListener.Start();
+                Console.WriteLine($"TCP Listener started on port {TcpPort}");
+
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        while (!_cts.Token.IsCancellationRequested)
+                        {
+                            _tcpClient = await _tcpListener.AcceptTcpClientAsync(_cts.Token);
+                            Console.WriteLine("TCP Client connected");
+                            SetupStreams();
+                        }
+                    }
+                    catch (OperationCanceledException) { /* Shutdown */ }
+                    catch (Exception ex) { Console.WriteLine($"TCP Accept Error: {ex.Message}"); }
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"TCP StartHost Error: {ex.Message}");
+            }
+        });
+    }
+
+    public async Task<bool> ConnectToPeerAsync(string ipAddress)
+    {
+        try
+        {
+            _tcpClient = new TcpClient();
+            var timeoutTask = Task.Delay(5000); // 5 second timeout
+            var connectTask = _tcpClient.ConnectAsync(ipAddress, TcpPort);
+
+            if (await Task.WhenAny(connectTask, timeoutTask) == timeoutTask)
+            {
+                Console.WriteLine($"Connection to {ipAddress}:{TcpPort} timed out");
+                _tcpClient.Close();
+                return false;
+            }
+
+            Console.WriteLine($"Connected to peer at {ipAddress}:{TcpPort}");
+            SetupStreams();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ConnectToPeerAsync Error to {ipAddress}: {ex.Message}");
+            return false;
+        }
+    }
+
+    private void SetupStreams()
+    {
+        try
+        {
+            var stream = _tcpClient!.GetStream();
+            _writer = new StreamWriter(stream) { AutoFlush = true };
+            _reader = new StreamReader(stream);
+
+            // Start background read loop
+            Task.Run(ReceiveLoopAsync);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"SetupStreams Error: {ex.Message}");
+        }
+    }
+
+    private async Task ReceiveLoopAsync()
+    {
+        try
+        {
+            while (_tcpClient != null && _tcpClient.Connected && !_cts.IsCancellationRequested)
+            {
+                string? json = await _reader!.ReadLineAsync();
+                if (string.IsNullOrEmpty(json))
+                {
+                    Console.WriteLine("Peer disconnected (empty read)");
+                    break;
+                }
+
+                var message = JsonSerializer.Deserialize<NetworkMessage>(json);
+                if (message != null)
+                {
+                    Console.WriteLine($"Message received: {message.Type} from {message.SenderName}");
+                    OnMessageReceived?.Invoke(message);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ReceiveLoopAsync Error: {ex.Message}");
+        }
+        finally
+        {
+            Disconnect();
+            OnDisconnected?.Invoke();
+        }
+    }
+
+    public async Task SendMessageAsync(NetworkMessage message)
+    {
+        try
+        {
+            if (_writer == null)
+            {
+                Console.WriteLine("SendMessageAsync: Writer is null");
+                return;
+            }
+            string json = JsonSerializer.Serialize(message);
+            await _writer.WriteLineAsync(json);
+            Console.WriteLine($"Message sent: {message.Type}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"SendMessageAsync Error: {ex.Message}");
+        }
+    }
+
+    public void Disconnect()
+    {
+        try
+        {
+            _cts.Cancel();
+            _tcpListener?.Stop();
+            _writer?.Dispose();
+            _reader?.Dispose();
+            _tcpClient?.Close();
+            Console.WriteLine("Disconnected");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Disconnect Error: {ex.Message}");
+        }
+    }
+}

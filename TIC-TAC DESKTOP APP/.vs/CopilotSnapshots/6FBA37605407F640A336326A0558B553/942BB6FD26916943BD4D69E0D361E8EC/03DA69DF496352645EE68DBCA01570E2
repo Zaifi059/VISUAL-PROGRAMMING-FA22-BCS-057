@@ -1,0 +1,283 @@
+﻿<Window x:Class="LocalP2PGaming.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="P2P Local Gaming" Height="600" Width="1000"
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent"
+        FontFamily="Segoe UI Variable">
+
+    <!-- Palette & Styles -->
+    <Window.Resources>
+        <!-- Colors -->
+        <Color x:Key="BgColor">#0B0F14</Color>
+        <Color x:Key="PanelColor">#0F1720</Color>
+        <Color x:Key="CardColor">#11151A</Color>
+        <Color x:Key="AccentCyan">#00E5FF</Color>
+        <Color x:Key="AccentPink">#FF6CA3</Color>
+        <Color x:Key="MutedText">#9AA6B2</Color>
+        <Color x:Key="BorderColor">#13202A</Color>
+
+        <SolidColorBrush x:Key="BgBrush" Color="{StaticResource BgColor}"/>
+        <LinearGradientBrush x:Key="WindowGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#07111A" Offset="0"/>
+            <GradientStop Color="#08141A" Offset="1"/>
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource PanelColor}"/>
+        <SolidColorBrush x:Key="CardBrush" Color="{StaticResource CardColor}"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentCyan}"/>
+        <SolidColorBrush x:Key="AccentPinkBrush" Color="{StaticResource AccentPink}"/>
+        <SolidColorBrush x:Key="MutedBrush" Color="{StaticResource MutedText}"/>
+        <SolidColorBrush x:Key="BorderBrushColor" Color="{StaticResource BorderColor}"/>
+
+        <!-- Refresh / Invite Button Style -->
+        <Style x:Key="PrimaryRoundedButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="12" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#33E8FF"/>
+                                <Setter TargetName="bd" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="1.02" ScaleY="1.02"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#00BBD9"/>
+                                <Setter TargetName="bd" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.99" ScaleY="0.99"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ListBox Item Style -->
+        <Style x:Key="PlayerItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="root" Background="{StaticResource CardBrush}" CornerRadius="10" Padding="12" BorderBrush="{StaticResource BorderBrushColor}" BorderThickness="1">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="root" Property="Background" Value="#162027"/>
+                                <Setter TargetName="root" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="1.01" ScaleY="1.01"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="root" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                <Setter TargetName="root" Property="Background" Value="#09242B"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Small dot indicator -->
+        <DataTemplate x:Key="StatusDotTemplate">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Ellipse Width="10" Height="10" Fill="{StaticResource AccentBrush}" Margin="0,0,8,0"/>
+                <TextBlock Text="{Binding}" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- TicTacToe Cell Style -->
+        <Style x:Key="CellButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#0F1418"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="64"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="BorderBrush" Value="#1E2A33"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="12" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" />
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="bd" Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)" To="0.8" Duration="0:0:0.18"/>
+                                            <DoubleAnimation Storyboard.TargetName="bd" Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="1.02" Duration="0:0:0.18"/>
+                                            <DoubleAnimation Storyboard.TargetName="bd" Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="1.02" Duration="0:0:0.18"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Setter TargetName="bd" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#00E5FF" Opacity="0.0" BlurRadius="16" ShadowDepth="0"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="bd" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="Opacity" Value="0.95"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Content brushes for X/O via DataTriggers using Button.Content -->
+        <Style x:Key="CellContentStyle" TargetType="ContentPresenter">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource AncestorType=Button}}" Value="X">
+                    <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource AncestorType=Button}}" Value="O">
+                    <Setter Property="Foreground" Value="{StaticResource AccentPinkBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="{StaticResource WindowGradient}" Padding="18">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="320"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Sidebar Card -->
+            <Border Grid.Column="0" Background="{StaticResource PanelBrush}" CornerRadius="14" Padding="18" Margin="0,0,16,0" BorderBrush="{StaticResource BorderBrushColor}" BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <DockPanel LastChildFill="False">
+                        <TextBlock Text="Discovered Players" Foreground="White" FontSize="20" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <Button Content="Refresh" Style="{StaticResource PrimaryRoundedButton}" Click="Refresh_Click" DockPanel.Dock="Right" Margin="10,0,0,0"/>
+                    </DockPanel>
+
+                    <ContentControl Grid.Row="1" ContentTemplate="{StaticResource StatusDotTemplate}" Content="Scanning for available desktops..." Margin="0,12,0,12"/>
+
+                    <ListBox Grid.Row="2" ItemsSource="{Binding DiscoveredPeers}" Background="Transparent" BorderThickness="0" ItemContainerStyle="{StaticResource PlayerItemStyle}" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Ip}" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Invite" Style="{StaticResource PrimaryRoundedButton}" Click="Invite_Click" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- Developer Footer -->
+                    <StackPanel Grid.Row="3" Orientation="Vertical" Margin="0,12,0,0">
+                        <Separator Background="#162026" Margin="-18,6"/>
+                        <TextBlock Text="HUZAIFA IHSAN" Foreground="{StaticResource MutedBrush}" FontWeight="Bold" FontSize="13"/>
+                        <TextBlock Text="REG # FA22-BCS-057" Foreground="{StaticResource AccentBrush}" FontSize="12" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Main Area -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Optional App Heading -->
+                <TextBlock Grid.Row="0" Text="P2P Tic Tac Toe" Foreground="White" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,6"/>
+
+                <Viewbox Grid.Row="1" Stretch="Uniform" Margin="20">
+                    <Grid Width="540" Height="420">
+                        <Border Background="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <UniformGrid Rows="3" Columns="3" Width="420" Height="420">
+                                <!-- Row 0 -->
+                                <Button x:Name="Btn00" Click="Cell_Click" Tag="0,0" Style="{StaticResource CellButtonStyle}">
+                                    <ContentPresenter Content="" Style="{StaticResource CellContentStyle}"/>
+                                </Button>
+                                <Button x:Name="Btn01" Click="Cell_Click" Tag="0,1" Style="{StaticResource CellButtonStyle}">
+                                    <ContentPresenter Content="" Style="{StaticResource CellContentStyle}"/>
+                                </Button>
+                                <Button x:Name="Btn02" Click="Cell_Click" Tag="0,2" Style="{StaticResource CellButtonStyle}">
+                                    <ContentPresenter Content="" Style="{StaticResource CellContentStyle}"/>
+                                </Button>
+                                <!-- Row 1 -->
+                                <Button x:Name="Btn10" Click="Cell_Click" Tag="1,0" Style="{StaticResource CellButtonStyle}">
+                                    <ContentPresenter Content="" Style="{StaticResource CellContentStyle}"/>
+                                </Button>
+                                <Button x:Name="Btn11" Click="Cell_Click" Tag="1,1" Style="{StaticResource CellButtonStyle}">
+                                    <ContentPresenter Content="" Style="{StaticResource CellContentStyle}"/>
+                                </Button>
+                                <Button x:Name="Btn12" Click="Cell_Click" Tag="1,2" Style="{StaticResource CellButtonStyle}">
+                                    <ContentPresenter Content="" Style="{StaticResource CellContentStyle}"/>
+                                </Button>
+                                <!-- Row 2 -->
+                                <Button x:Name="Btn20" Click="Cell_Click" Tag="2,0" Style="{StaticResource CellButtonStyle}">
+                                    <ContentPresenter Content="" Style="{StaticResource CellContentStyle}"/>
+                                </Button>
+                                <Button x:Name="Btn21" Click="Cell_Click" Tag="2,1" Style="{StaticResource CellButtonStyle}">
+                                    <ContentPresenter Content="" Style="{StaticResource CellContentStyle}"/>
+                                </Button>
+                                <Button x:Name="Btn22" Click="Cell_Click" Tag="2,2" Style="{StaticResource CellButtonStyle}">
+                                    <ContentPresenter Content="" Style="{StaticResource CellContentStyle}"/>
+                                </Button>
+                            </UniformGrid>
+                        </Border>
+                    </Grid>
+                </Viewbox>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

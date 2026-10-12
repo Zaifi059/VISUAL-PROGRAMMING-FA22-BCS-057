@@ -1,0 +1,222 @@
+﻿using LocalP2PGaming.Models;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Text;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+
+public class PeerFoundEventArgs : EventArgs
+{
+    public string IpAddress { get; set; } = string.Empty;
+    public string MachineName { get; set; } = string.Empty;
+    public string SenderId { get; set; } = string.Empty;
+    public int SenderPort { get; set; }
+}
+
+public class NetworkDiscovery
+{
+    private const int UdpPort = 8888;
+    private UdpClient? _udpListener;
+    private CancellationTokenSource _cts = new();
+    private HashSet<string> _discoveredIds = new();
+    private readonly string _myId = Guid.NewGuid().ToString();
+    // Optional: the TCP port this instance wants to advertise (set by caller after StartHost)
+    public int AdvertisedPort { get; set; } = 0;
+
+    public event EventHandler<PeerFoundEventArgs>? OnPeerDiscovered;
+
+    public string LocalMachineName { get; } = Environment.MachineName;
+
+    public void StartListening()
+    {
+        try
+        {
+            _udpListener = new UdpClient();
+            // 1. Allow multiple app instances to share port 8888
+            // Make socket shareable before binding
+            _udpListener.Client.ExclusiveAddressUse = false;
+            _udpListener.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            _udpListener.Client.Bind(new IPEndPoint(IPAddress.Any, UdpPort));
+
+            _cts = new CancellationTokenSource();
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    while (!_cts.Token.IsCancellationRequested)
+                    {
+                        var result = await _udpListener.ReceiveAsync(_cts.Token);
+                        string json = Encoding.UTF8.GetString(result.Buffer);
+                        var message = JsonSerializer.Deserialize<NetworkMessage>(json);
+
+                        if (message == null) continue;
+
+                        // Don't add ourselves (compare by unique instance id)
+                        if (!string.IsNullOrEmpty(message.SenderId) && message.SenderId == _myId)
+                            continue;
+
+                        System.Diagnostics.Debug.WriteLine($"Broadcast received from ID={message.SenderId} Name={message.SenderName} Ip={message.SenderIp} Port={message.SenderPort}");
+
+                        if (message.Type == MessageType.DiscoveryPing)
+                        {
+                            // Reply to whoever pinged us with a Pong
+                            SendPong(result.RemoteEndPoint.Address.ToString());
+                        }
+
+                        if (message.Type == MessageType.DiscoveryPing || message.Type == MessageType.DiscoveryPong)
+                        {
+                            // Only report each peer once per discovery cycle (match by SenderId if present, otherwise by IP)
+                            var peerKey = !string.IsNullOrEmpty(message.SenderId) ? message.SenderId : message.SenderIp;
+                            if (!_discoveredIds.Contains(peerKey))
+                            {
+                                _discoveredIds.Add(peerKey);
+                                // Include port if provided
+                                OnPeerDiscovered?.Invoke(this, new PeerFoundEventArgs
+                                {
+                                    IpAddress = message.SenderIp,
+                                    MachineName = message.SenderName,
+                                    SenderId = message.SenderId ?? string.Empty,
+                                    SenderPort = message.SenderPort
+                                });
+                            }
+                        }
+                    }
+                }
+                catch (OperationCanceledException) { /* Clean exit */ }
+                catch (Exception ex) { Console.WriteLine($"UDP Listener Error: {ex.Message}"); }
+            });
+
+            // Start periodic broadcaster (every ~2.5 seconds)
+            Task.Run(async () =>
+            {
+                try
+                {
+                    while (!_cts.Token.IsCancellationRequested)
+                    {
+                        // Send a periodic announcement without clearing discovered ids
+                        BroadcastPing(false);
+                        await Task.Delay(2500, _cts.Token);
+                    }
+                }
+                catch (OperationCanceledException) { }
+                catch (Exception ex) { Console.WriteLine($"Periodic broadcast error: {ex.Message}"); }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"UDP StartListening Error: {ex.Message}");
+        }
+    }
+
+    public void BroadcastPing(bool clearDiscovered = false)
+    {
+        Task.Run(() =>
+        {
+            try
+            {
+                if (clearDiscovered) _discoveredIds.Clear(); // Reset for new discovery cycle when requested
+
+                var ping = new NetworkMessage
+                {
+                    Type = MessageType.DiscoveryPing,
+                    SenderName = LocalMachineName,
+                    SenderIp = GetLocalIpAddress(),
+                    SenderId = _myId,
+                    SenderPort = AdvertisedPort
+                };
+
+                // Get all network interfaces and broadcast on each
+                foreach (var networkInterface in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    if (networkInterface.OperationalStatus != OperationalStatus.Up)
+                        continue;
+
+                    var ipProperties = networkInterface.GetIPProperties();
+                    foreach (var unicastAddress in ipProperties.UnicastAddresses)
+                    {
+                        if (unicastAddress.Address.AddressFamily != AddressFamily.InterNetwork)
+                            continue;
+
+                        // Calculate broadcast address
+                        byte[] broadcastBytes = unicastAddress.Address.GetAddressBytes();
+                        byte[] maskBytes = unicastAddress.IPv4Mask.GetAddressBytes();
+
+                        for (int i = 0; i < broadcastBytes.Length; i++)
+                        {
+                            broadcastBytes[i] = (byte)(broadcastBytes[i] | (maskBytes[i] ^ 255));
+                        }
+
+                        string broadcastAddress = new IPAddress(broadcastBytes).ToString();
+                        Console.WriteLine($"Broadcasting to: {broadcastAddress}");
+                        SendUdpPacket(ping, broadcastAddress);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Broadcast Error: {ex.Message}");
+            }
+        });
+    }
+
+    private void SendPong(string targetIp)
+    {
+        try
+        {
+            var pong = new NetworkMessage
+            {
+                Type = MessageType.DiscoveryPong,
+                SenderName = LocalMachineName,
+                SenderIp = GetLocalIpAddress(),
+                SenderId = _myId,
+                SenderPort = AdvertisedPort
+            };
+            SendUdpPacket(pong, targetIp);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"SendPong Error: {ex.Message}");
+        }
+    }
+
+    private void SendUdpPacket(NetworkMessage msg, string ip)
+    {
+        try
+        {
+            using var client = new UdpClient();
+            client.EnableBroadcast = true;
+            var endPoint = new IPEndPoint(IPAddress.Parse(ip), UdpPort);
+            byte[] bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(msg));
+            client.Send(bytes, bytes.Length, endPoint);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"SendUdpPacket Error to {ip}: {ex.Message}");
+        }
+    }
+
+    public static string GetLocalIpAddress()
+    {
+        try
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                    return ip.ToString();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"GetLocalIpAddress Error: {ex.Message}");
+        }
+        return "127.0.0.1";
+    }
+
+    public void Stop() => _cts.Cancel();
+}

@@ -1,0 +1,105 @@
+﻿using LocalP2PGaming.Models;
+using System;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+
+
+public class NetworkManager
+{
+    private const int TcpPort = 8889;
+    private TcpListener? _tcpListener;
+    private TcpClient? _tcpClient;
+    private StreamWriter? _writer;
+    private StreamReader? _reader;
+    private CancellationTokenSource _cts = new();
+
+    public event Action<NetworkMessage>? OnMessageReceived;
+    public event Action? OnDisconnected;
+
+    public void StartHost()
+    {
+        try
+        {
+            _tcpListener = new TcpListener(IPAddress.Any, TcpPort);
+            _tcpListener.Start();
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    _tcpClient = await _tcpListener.AcceptTcpClientAsync(_cts.Token);
+                    SetupStreams();
+                }
+                catch { /* Handle shutdown */ }
+            });
+        }
+        catch
+        {
+            // Expected for the 2nd instance on the same PC. 
+        }
+    }
+
+    public async Task<bool> ConnectToPeerAsync(string ipAddress)
+    {
+        try
+        {
+            _tcpClient = new TcpClient();
+            await _tcpClient.ConnectAsync(ipAddress, TcpPort);
+            SetupStreams();
+            return true;
+        }
+        catch { return false; }
+    }
+
+    private void SetupStreams()
+    {
+        var stream = _tcpClient!.GetStream();
+        _writer = new StreamWriter(stream) { AutoFlush = true };
+        _reader = new StreamReader(stream);
+
+        // Start background read loop
+        Task.Run(ReceiveLoopAsync);
+    }
+
+    private async Task ReceiveLoopAsync()
+    {
+        try
+        {
+            while (_tcpClient != null && _tcpClient.Connected && !_cts.IsCancellationRequested)
+            {
+                string? json = await _reader!.ReadLineAsync();
+                if (string.IsNullOrEmpty(json)) break; // Disconnected
+
+                var message = JsonSerializer.Deserialize<NetworkMessage>(json);
+                if (message != null)
+                    OnMessageReceived?.Invoke(message);
+            }
+        }
+        catch { /* Socket dropped */ }
+        finally
+        {
+            Disconnect();
+            OnDisconnected?.Invoke();
+        }
+    }
+
+    public async Task SendMessageAsync(NetworkMessage message)
+    {
+        if (_writer == null) return;
+        string json = JsonSerializer.Serialize(message);
+        await _writer.WriteLineAsync(json); // WriteLine is crucial for stream separation
+    }
+
+    public void Disconnect()
+    {
+        _cts.Cancel();
+        _tcpListener?.Stop();
+        _writer?.Dispose();
+        _reader?.Dispose();
+        _tcpClient?.Close();
+    }
+}

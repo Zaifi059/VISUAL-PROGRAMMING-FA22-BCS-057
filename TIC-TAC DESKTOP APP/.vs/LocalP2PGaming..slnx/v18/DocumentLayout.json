@@ -1,0 +1,134 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\PC\\Desktop\\VP TASK\\LocalP2PGaming\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{24D5347A-CBA0-1599-0EED-BD9A03A5C1BD}|LocalP2PGaming..csproj|c:\\users\\pc\\desktop\\vp task\\localp2pgaming\\services\\networkmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{24D5347A-CBA0-1599-0EED-BD9A03A5C1BD}|LocalP2PGaming..csproj|solutionrelative:services\\networkmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{24D5347A-CBA0-1599-0EED-BD9A03A5C1BD}|LocalP2PGaming..csproj|c:\\users\\pc\\desktop\\vp task\\localp2pgaming\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{24D5347A-CBA0-1599-0EED-BD9A03A5C1BD}|LocalP2PGaming..csproj|solutionrelative:mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{24D5347A-CBA0-1599-0EED-BD9A03A5C1BD}|LocalP2PGaming..csproj|c:\\users\\pc\\desktop\\vp task\\localp2pgaming\\localp2pgaming..csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{24D5347A-CBA0-1599-0EED-BD9A03A5C1BD}|LocalP2PGaming..csproj|solutionrelative:localp2pgaming..csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{24D5347A-CBA0-1599-0EED-BD9A03A5C1BD}|LocalP2PGaming..csproj|c:\\users\\pc\\desktop\\vp task\\localp2pgaming\\models\\networkmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{24D5347A-CBA0-1599-0EED-BD9A03A5C1BD}|LocalP2PGaming..csproj|solutionrelative:models\\networkmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{24D5347A-CBA0-1599-0EED-BD9A03A5C1BD}|LocalP2PGaming..csproj|c:\\users\\pc\\desktop\\vp task\\localp2pgaming\\services\\networkdiscovery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{24D5347A-CBA0-1599-0EED-BD9A03A5C1BD}|LocalP2PGaming..csproj|solutionrelative:services\\networkdiscovery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{24D5347A-CBA0-1599-0EED-BD9A03A5C1BD}|LocalP2PGaming..csproj|c:\\users\\pc\\desktop\\vp task\\localp2pgaming\\viewmodels\\peerviewmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{24D5347A-CBA0-1599-0EED-BD9A03A5C1BD}|LocalP2PGaming..csproj|solutionrelative:viewmodels\\peerviewmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{24D5347A-CBA0-1599-0EED-BD9A03A5C1BD}|LocalP2PGaming..csproj|c:\\users\\pc\\desktop\\vp task\\localp2pgaming\\viewmodels\\mainviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{24D5347A-CBA0-1599-0EED-BD9A03A5C1BD}|LocalP2PGaming..csproj|solutionrelative:viewmodels\\mainviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "MainViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\VP TASK\\LocalP2PGaming\\ViewModels\\MainViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\MainViewModel.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\VP TASK\\LocalP2PGaming\\ViewModels\\MainViewModel.cs",
+              "RelativeToolTip": "ViewModels\\MainViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC4BAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-12T00:42:47.395Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\VP TASK\\LocalP2PGaming\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "MainWindow.xaml",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\VP TASK\\LocalP2PGaming\\MainWindow.xaml",
+              "RelativeToolTip": "MainWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-10-11T21:16:42.425Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "PeerViewModels.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\VP TASK\\LocalP2PGaming\\ViewModels\\PeerViewModels.cs",
+              "RelativeDocumentMoniker": "ViewModels\\PeerViewModels.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\VP TASK\\LocalP2PGaming\\ViewModels\\PeerViewModels.cs",
+              "RelativeToolTip": "ViewModels\\PeerViewModels.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAEBUwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-11T20:45:26.604Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "NetworkManager.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\VP TASK\\LocalP2PGaming\\Services\\NetworkManager.cs",
+              "RelativeDocumentMoniker": "Services\\NetworkManager.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\VP TASK\\LocalP2PGaming\\Services\\NetworkManager.cs",
+              "RelativeToolTip": "Services\\NetworkManager.cs",
+              "ViewState": "AgIAAEkAAAAAAAAAAAAxwEkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-11T20:45:13.942Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "NetworkDiscovery.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\VP TASK\\LocalP2PGaming\\Services\\NetworkDiscovery.cs",
+              "RelativeDocumentMoniker": "Services\\NetworkDiscovery.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\VP TASK\\LocalP2PGaming\\Services\\NetworkDiscovery.cs",
+              "RelativeToolTip": "Services\\NetworkDiscovery.cs",
+              "ViewState": "AgIAAMUAAAAAAAAAAABBwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-11T20:44:31.575Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "NetworkModels.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\VP TASK\\LocalP2PGaming\\Models\\NetworkModels.cs",
+              "RelativeDocumentMoniker": "Models\\NetworkModels.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\VP TASK\\LocalP2PGaming\\Models\\NetworkModels.cs",
+              "RelativeToolTip": "Models\\NetworkModels.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAABYwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-11T20:44:23.542Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "LocalP2PGaming..csproj",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\VP TASK\\LocalP2PGaming\\LocalP2PGaming..csproj",
+              "RelativeDocumentMoniker": "LocalP2PGaming..csproj",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\VP TASK\\LocalP2PGaming\\LocalP2PGaming..csproj",
+              "RelativeToolTip": "LocalP2PGaming..csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-10-11T20:39:14.213Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

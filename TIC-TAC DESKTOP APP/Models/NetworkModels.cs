@@ -1,0 +1,33 @@
+﻿using System.Text.Json;
+
+namespace LocalP2PGaming.Models
+{
+    public enum MessageType
+    {
+        DiscoveryPing, DiscoveryPong, GameInvite, GameAccept, GameReject, GameMove, GameChat, Disconnect
+    }
+
+    public class NetworkMessage
+    {
+        public MessageType Type { get; set; }
+        public string SenderName { get; set; } = string.Empty;
+        public string SenderIp { get; set; } = string.Empty;
+        public string SenderId { get; set; } = string.Empty;
+        public int SenderPort { get; set; }
+        public string Payload { get; set; } = string.Empty;
+    }
+
+    public class GameInvitePayload
+    {
+        public string GameType { get; set; } = "TicTacToe";
+    }
+
+    public class GameMovePayload
+    {
+        public int StartRow { get; set; }
+        public int StartCol { get; set; }
+        public int EndRow { get; set; }
+        public int EndCol { get; set; }
+        public int PlayerId { get; set; }
+    }
+}

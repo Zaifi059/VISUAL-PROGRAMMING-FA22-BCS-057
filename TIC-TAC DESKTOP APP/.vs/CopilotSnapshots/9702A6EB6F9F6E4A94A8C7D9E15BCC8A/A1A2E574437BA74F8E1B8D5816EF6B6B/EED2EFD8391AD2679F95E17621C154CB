@@ -1,0 +1,135 @@
+﻿<Window x:Class="LocalP2PGaming.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="P2P Local Gaming" Height="500" Width="850"
+        WindowStartupLocation="CenterScreen"
+        Background="#121212"
+        FontFamily="Segoe UI">
+
+    <!-- Define Reusable Styles -->
+    <Window.Resources>
+        <Style x:Key="InviteButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#0078D7"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1084E3"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#005A9E"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="InvisibleListBoxItem" TargetType="ListBoxItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <ContentPresenter/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="280"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar: Discovered Players -->
+        <Border Background="#1E1E1E" BorderBrush="#2D2D30" BorderThickness="0,0,2,0">
+            <Grid Margin="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Discovered Players" Foreground="White" FontWeight="Bold" FontSize="22" Margin="0,5,0,20"/>
+
+                <ListBox Grid.Row="1" ItemsSource="{Binding DiscoveredPeers}" 
+                         Background="Transparent" BorderThickness="0" 
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ItemContainerStyle="{StaticResource InvisibleListBoxItem}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <!-- Player Card -->
+                            <Border Background="#2D2D30" CornerRadius="8" Padding="15">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Text="{Binding Name}" Foreground="White" FontWeight="SemiBold" FontSize="16"/>
+                                    <TextBlock Grid.Row="1" Text="{Binding Ip}" Foreground="#A0A0A0" FontSize="12" Margin="0,3,0,15"/>
+
+                                    <!-- THE CLICK EVENT HAS BEEN ADDED HERE -->
+                                    <Button Grid.Row="2" Content="Invite to Game" Style="{StaticResource InviteButtonStyle}" Click="Invite_Click"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+
+        <!-- Main Area: Game Board -->
+        <Grid Grid.Column="1" Background="#121212">
+            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                <UniformGrid Rows="3" Columns="3" Width="360" Height="360">
+                    <UniformGrid.Resources>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="#1E1E1E"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="FontSize" Value="70"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="Margin" Value="5"/>
+                            <Setter Property="BorderBrush" Value="#333333"/>
+                            <Setter Property="BorderThickness" Value="2"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#2D2D30"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </UniformGrid.Resources>
+
+                    <!-- Row 0 -->
+                    <Button x:Name="Btn00" Click="Cell_Click" Tag="0,0"/>
+                    <Button x:Name="Btn01" Click="Cell_Click" Tag="0,1"/>
+                    <Button x:Name="Btn02" Click="Cell_Click" Tag="0,2"/>
+                    <!-- Row 1 -->
+                    <Button x:Name="Btn10" Click="Cell_Click" Tag="1,0"/>
+                    <Button x:Name="Btn11" Click="Cell_Click" Tag="1,1"/>
+                    <Button x:Name="Btn12" Click="Cell_Click" Tag="1,2"/>
+                    <!-- Row 2 -->
+                    <Button x:Name="Btn20" Click="Cell_Click" Tag="2,0"/>
+                    <Button x:Name="Btn21" Click="Cell_Click" Tag="2,1"/>
+                    <Button x:Name="Btn22" Click="Cell_Click" Tag="2,2"/>
+                </UniformGrid>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

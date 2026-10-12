@@ -1,0 +1,39 @@
+C:\Users\hp\source\repos\LocalP2PGaming\bin\Debug\net10.0-windows\LocalP2PGaming..exe
+C:\Users\hp\source\repos\LocalP2PGaming\bin\Debug\net10.0-windows\LocalP2PGaming..deps.json
+C:\Users\hp\source\repos\LocalP2PGaming\bin\Debug\net10.0-windows\LocalP2PGaming..runtimeconfig.json
+C:\Users\hp\source\repos\LocalP2PGaming\bin\Debug\net10.0-windows\LocalP2PGaming..dll
+C:\Users\hp\source\repos\LocalP2PGaming\bin\Debug\net10.0-windows\LocalP2PGaming..pdb
+C:\Users\hp\source\repos\LocalP2PGaming\obj\Debug\net10.0-windows\MainWindow.baml
+C:\Users\hp\source\repos\LocalP2PGaming\obj\Debug\net10.0-windows\MainWindow.g.cs
+C:\Users\hp\source\repos\LocalP2PGaming\obj\Debug\net10.0-windows\App.g.cs
+C:\Users\hp\source\repos\LocalP2PGaming\obj\Debug\net10.0-windows\LocalP2PGaming._MarkupCompile.cache
+C:\Users\hp\source\repos\LocalP2PGaming\obj\Debug\net10.0-windows\LocalP2PGaming..g.resources
+C:\Users\hp\source\repos\LocalP2PGaming\obj\Debug\net10.0-windows\LocalP2PGaming..GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\hp\source\repos\LocalP2PGaming\obj\Debug\net10.0-windows\LocalP2PGaming..AssemblyInfoInputs.cache
+C:\Users\hp\source\repos\LocalP2PGaming\obj\Debug\net10.0-windows\LocalP2PGaming..AssemblyInfo.cs
+C:\Users\hp\source\repos\LocalP2PGaming\obj\Debug\net10.0-windows\LocalP2PGaming..csproj.CoreCompileInputs.cache
+C:\Users\hp\source\repos\LocalP2PGaming\obj\Debug\net10.0-windows\LocalP2PGaming..dll
+C:\Users\hp\source\repos\LocalP2PGaming\obj\Debug\net10.0-windows\refint\LocalP2PGaming..dll
+C:\Users\hp\source\repos\LocalP2PGaming\obj\Debug\net10.0-windows\LocalP2PGaming..pdb
+C:\Users\hp\source\repos\LocalP2PGaming\obj\Debug\net10.0-windows\LocalP2PGaming..genruntimeconfig.cache
+C:\Users\hp\source\repos\LocalP2PGaming\obj\Debug\net10.0-windows\ref\LocalP2PGaming..dll
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\bin\Debug\net10.0-windows\LocalP2PGaming..exe
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\bin\Debug\net10.0-windows\LocalP2PGaming..deps.json
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\bin\Debug\net10.0-windows\LocalP2PGaming..runtimeconfig.json
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\bin\Debug\net10.0-windows\LocalP2PGaming..dll
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\bin\Debug\net10.0-windows\LocalP2PGaming..pdb
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\obj\Debug\net10.0-windows\MainWindow.baml
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\obj\Debug\net10.0-windows\MainWindow.g.cs
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\obj\Debug\net10.0-windows\App.g.cs
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\obj\Debug\net10.0-windows\LocalP2PGaming._MarkupCompile.cache
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\obj\Debug\net10.0-windows\LocalP2PGaming..g.resources
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\obj\Debug\net10.0-windows\LocalP2PGaming..GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\obj\Debug\net10.0-windows\LocalP2PGaming..AssemblyInfoInputs.cache
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\obj\Debug\net10.0-windows\LocalP2PGaming..AssemblyInfo.cs
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\obj\Debug\net10.0-windows\LocalP2PGaming..csproj.CoreCompileInputs.cache
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\obj\Debug\net10.0-windows\LocalP2PGaming..dll
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\obj\Debug\net10.0-windows\refint\LocalP2PGaming..dll
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\obj\Debug\net10.0-windows\LocalP2PGaming..pdb
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\obj\Debug\net10.0-windows\LocalP2PGaming..genruntimeconfig.cache
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\obj\Debug\net10.0-windows\ref\LocalP2PGaming..dll
+C:\Users\PC\Desktop\VP TASK\LocalP2PGaming\obj\Debug\net10.0-windows\LocalP2P.A1D34710.Up2Date

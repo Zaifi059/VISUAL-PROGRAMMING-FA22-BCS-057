@@ -1,0 +1,115 @@
+﻿using LocalP2PGaming.Models;
+using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+
+public class PeerFoundEventArgs : EventArgs
+{
+    public string IpAddress { get; set; } = string.Empty;
+    public string MachineName { get; set; } = string.Empty;
+}
+
+public class NetworkDiscovery
+{
+    private const int UdpPort = 8888;
+    private UdpClient? _udpListener;
+    private CancellationTokenSource _cts = new();
+
+    public event EventHandler<PeerFoundEventArgs>? OnPeerDiscovered;
+
+    public string LocalMachineName { get; } = Environment.MachineName;
+
+    public void StartListening()
+    {
+        _udpListener = new UdpClient();
+        // 1. Allow multiple app instances to share port 8888
+        _udpListener.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+        _udpListener.Client.Bind(new IPEndPoint(IPAddress.Any, UdpPort));
+
+        _cts = new CancellationTokenSource();
+
+        Task.Run(async () =>
+        {
+            try
+            {
+                while (!_cts.Token.IsCancellationRequested)
+                {
+                    var result = await _udpListener.ReceiveAsync(_cts.Token);
+                    string json = Encoding.UTF8.GetString(result.Buffer);
+                    var message = JsonSerializer.Deserialize<NetworkMessage>(json);
+
+                    if (message == null) continue;
+
+                    // 2. CRITICAL FOR LOCAL TESTING: Comment out the line below so instances on the same PC don't ignore each other!
+                    // if (message.SenderIp == GetLocalIpAddress()) continue;
+
+                    if (message.Type == MessageType.DiscoveryPing)
+                    {
+                        // Reply to whoever pinged us
+                        SendPong(result.RemoteEndPoint.Address.ToString());
+                    }
+
+                    if (message.Type == MessageType.DiscoveryPing || message.Type == MessageType.DiscoveryPong)
+                    {
+                        OnPeerDiscovered?.Invoke(this, new PeerFoundEventArgs
+                        {
+                            IpAddress = message.SenderIp,
+                            MachineName = message.SenderName
+                        });
+                    }
+                }
+            }
+            catch (OperationCanceledException) { /* Clean exit */ }
+            catch (Exception ex) { Console.WriteLine($"UDP Error: {ex.Message}"); }
+        });
+    }
+
+    public void BroadcastPing()
+    {
+        var ping = new NetworkMessage
+        {
+            Type = MessageType.DiscoveryPing,
+            SenderName = LocalMachineName,
+            SenderIp = GetLocalIpAddress()
+        };
+
+        SendUdpPacket(ping, IPAddress.Broadcast.ToString());
+    }
+
+    private void SendPong(string targetIp)
+    {
+        var pong = new NetworkMessage
+        {
+            Type = MessageType.DiscoveryPong,
+            SenderName = LocalMachineName,
+            SenderIp = GetLocalIpAddress()
+        };
+        SendUdpPacket(pong, targetIp);
+    }
+
+    private void SendUdpPacket(NetworkMessage msg, string ip)
+    {
+        using var client = new UdpClient();
+        client.EnableBroadcast = true;
+        var endPoint = new IPEndPoint(IPAddress.Parse(ip), UdpPort);
+        byte[] bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(msg));
+        client.Send(bytes, bytes.Length, endPoint);
+    }
+
+    public static string GetLocalIpAddress()
+    {
+        var host = Dns.GetHostEntry(Dns.GetHostName());
+        foreach (var ip in host.AddressList)
+        {
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+                return ip.ToString();
+        }
+        return "127.0.0.1";
+    }
+
+    public void Stop() => _cts.Cancel();
+}
